@@ -17,7 +17,7 @@ An intelligent chatbot that provides guidance on savings, taxes, and investments
 - HuggingFace Transformers (for AI model)
 - PyTorch (for model inference)
 - ibm watson
-- granite
+- granite models
 
 ## Installation
 
