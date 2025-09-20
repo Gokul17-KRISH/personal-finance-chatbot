@@ -1,6 +1,32 @@
 import streamlit as st
 from transformers import pipeline
 import re
+import os
+from ibm_watson import AssistantV2
+from ibm_cloud_sdk_core.authenticators import IAMAuthenticator
+from ibm_watson import NaturalLanguageUnderstandingV1
+from ibm_watson.natural_language_understanding_v1 import Features, EntitiesOptions, KeywordsOptions
+
+# Initialize IBM Watson services
+@st.cache(allow_output_mutation=True)
+def init_watson_services():
+    # IBM Watson Assistant for conversational AI
+    assistant_authenticator = IAMAuthenticator('your_watson_assistant_api_key')
+    assistant = AssistantV2(
+        version='2021-06-14',
+        authenticator=assistant_authenticator
+    )
+    assistant.set_service_url('your_watson_assistant_url')
+
+    # IBM Watson Natural Language Understanding
+    nlu_authenticator = IAMAuthenticator('your_nlu_api_key')
+    nlu = NaturalLanguageUnderstandingV1(
+        version='2021-08-01',
+        authenticator=nlu_authenticator
+    )
+    nlu.set_service_url('your_nlu_url')
+
+    return assistant, nlu
 
 # Initialize the HuggingFace conversational model pipeline
 @st.cache(allow_output_mutation=True)
@@ -10,7 +36,7 @@ def load_hf_chatbot():
 
 hf_chatbot = load_hf_chatbot()
 
-# Enhanced financial advice database
+# Enhanced financial advice database with Granite integration
 FINANCIAL_ADVICE = {
     "savings": [
         "Try to save at least 20% of your income each month for emergencies and future goals.",
@@ -86,6 +112,37 @@ st.sidebar.write("• Good credit score: 670+")
 
 if "chat_history" not in st.session_state:
     st.session_state.chat_history = []
+
+def analyze_with_watson_nlu(text):
+    """Analyze text using IBM Watson NLU"""
+    try:
+        response = nlu.analyze(
+            text=text,
+            features=Features(
+                entities=EntitiesOptions(emotion=True, sentiment=True, limit=2),
+                keywords=KeywordsOptions(sentiment=True, emotion=True, limit=2)
+            )
+        ).get_result()
+        return response
+    except Exception as e:
+        st.error(f"Watson NLU Error: {str(e)}")
+        return None
+
+def get_watson_assistant_response(user_input):
+    """Get response from IBM Watson Assistant"""
+    try:
+        response = assistant.message(
+            assistant_id='your_assistant_id',
+            session_id='your_session_id',
+            input={
+                'message_type': 'text',
+                'text': user_input
+            }
+        ).get_result()
+        return response
+    except Exception as e:
+        st.error(f"Watson Assistant Error: {str(e)}")
+        return None
 
 def generate_enhanced_response(user_input):
     user_input_lower = user_input.lower()
@@ -196,4 +253,4 @@ if user_input:
 
 # Footer
 st.markdown("---")
-st.markdown("*Powered by HuggingFace Transformers & Streamlit*")
+st.markdown("*Powered by HuggingFace Transformers, IBM Watson & Streamlit*")
