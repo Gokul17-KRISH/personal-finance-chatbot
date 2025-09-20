@@ -1,4 +1,9 @@
 streamlit
 transformers
 torch
-pytest
+torchvision
+torchaudio
+sentencepiece
+protobuf
+numpy
+pandas
