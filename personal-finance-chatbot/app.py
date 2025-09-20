@@ -113,8 +113,18 @@ st.sidebar.write("• Good credit score: 670+")
 if "chat_history" not in st.session_state:
     st.session_state.chat_history = []
 
+# Initialize Watson services
+try:
+    assistant, nlu = init_watson_services()
+    watson_available = True
+except Exception as e:
+    watson_available = False
+    st.warning("IBM Watson services not configured. Using basic AI only.")
+
 def analyze_with_watson_nlu(text):
     """Analyze text using IBM Watson NLU"""
+    if not watson_available:
+        return None
     try:
         response = nlu.analyze(
             text=text,
@@ -130,6 +140,8 @@ def analyze_with_watson_nlu(text):
 
 def get_watson_assistant_response(user_input):
     """Get response from IBM Watson Assistant"""
+    if not watson_available:
+        return None
     try:
         response = assistant.message(
             assistant_id='your_assistant_id',
