@@ -16,6 +16,8 @@ An intelligent chatbot that provides guidance on savings, taxes, and investments
 - Streamlit (for web interface)
 - HuggingFace Transformers (for AI model)
 - PyTorch (for model inference)
+- ibm watson
+- granite
 
 ## Installation
 
